@@ -120,7 +120,7 @@ public class MasterScript : MonoBehaviour
         WeightCanvas.gameObject.SetActive(true);
 
         TimesWeighed++;
-        WeighCount.text = "Times weighed: " + TimesWeighed;
+        WeighCount.text = "Times Weighed: " + TimesWeighed;
 
         yield return new WaitForSeconds(timer);
 
@@ -150,21 +150,58 @@ public class MasterScript : MonoBehaviour
     {
         CoinPossibility[] NoneOutcome = CountPossibitiesNone(LeftPanCoins, RightPanCoins);
         int NonePossibilities = NoneOutcome.Count(c => c.Possible);
+        int DistinctCoinsReminingNone = NoneOutcome.Where(c => c.Possible).Select(c => c.CoinNumber).Distinct().Count();
         CoinPossibility[] LeftOutcome = CountPossibitiesLeft(LeftPanCoins, RightPanCoins);
         int LeftPossibilities = LeftOutcome.Count(c => c.Possible);
+        int DistinctCoinsReminingLeft = LeftOutcome.Where(c => c.Possible).Select(c => c.CoinNumber).Distinct().Count();
         CoinPossibility[] RightOutcome = CountPossibitiesRight(LeftPanCoins, RightPanCoins);
         int RightPossibilities = RightOutcome.Count(c => c.Possible);
+        int DistinctCoinsReminingRight = RightOutcome.Where(c => c.Possible).Select(c => c.CoinNumber).Distinct().Count();
 
         int MaximumPossibilities = Mathf.Max(RightPossibilities, LeftPossibilities, NonePossibilities);
 
         List<int> PossibleOutcomes = new List<int>();
 
+        int MaximumDistinctCoinsRemining = 0;
         if (NonePossibilities == MaximumPossibilities || (NonePossibilities == 2 && MaximumPossibilities == 3))
+        {
             PossibleOutcomes.Add(0);
+            MaximumDistinctCoinsRemining = DistinctCoinsReminingNone;
+        }
         if (LeftPossibilities == MaximumPossibilities || (LeftPossibilities == 2 && MaximumPossibilities == 3))
+        {
             PossibleOutcomes.Add(1);
+            MaximumDistinctCoinsRemining = Mathf.Max(DistinctCoinsReminingLeft, MaximumDistinctCoinsRemining);
+        }
         if (RightPossibilities == MaximumPossibilities || (RightPossibilities == 2 && MaximumPossibilities == 3))
+        {
             PossibleOutcomes.Add(2);
+            MaximumDistinctCoinsRemining = Mathf.Max(DistinctCoinsReminingRight, MaximumDistinctCoinsRemining);
+        }
+
+        if (MaximumDistinctCoinsRemining > 6 && PossibleOutcomes.Count > 1)
+
+            for (int i = 0; i < PossibleOutcomes.Count; i++)
+            {
+                int DistinctCoins = 0;
+                switch (PossibleOutcomes[i])
+                {
+                    case 0:
+                        DistinctCoins = DistinctCoinsReminingNone;
+                        break;
+                    case 1:
+                        DistinctCoins = DistinctCoinsReminingLeft;
+                        break;
+                    case 2:
+                        DistinctCoins = DistinctCoinsReminingRight;
+                        break;
+                }
+                if (DistinctCoins != MaximumDistinctCoinsRemining)
+                {
+                    PossibleOutcomes.RemoveAt(i);
+                    i--;
+                }
+            }
 
         int Outcome = PossibleOutcomes[UnityEngine.Random.Range(0, PossibleOutcomes.Count)];
         GameObject ResultObject = Instantiate(ResultPfb, HorizontalGroup.transform);
@@ -286,7 +323,7 @@ public class MasterScript : MonoBehaviour
         MainCanvas.gameObject.SetActive(true);
         ResultCanvas.gameObject.SetActive(false);
         WeighButton.gameObject.SetActive(true);
-        WeighCount.text = "Times weighed: 0";
+        WeighCount.text = "Times Weighed: 0";
         foreach (Transform child in HorizontalGroup.transform)
         {
             Destroy(child.gameObject);

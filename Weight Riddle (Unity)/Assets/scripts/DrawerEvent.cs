@@ -33,7 +33,7 @@ public class DrawerEvent : MonoBehaviour
     public void toggleDrawer()
     {
         IsGoingUp = !IsGoingUp;
-        ButtonText.text = IsGoingUp ? "⌄" : "^";
+        ButtonText.text = IsGoingUp ? "v" : "^";
         StartCoroutine(SlideDrawerMenu());
     }
 
